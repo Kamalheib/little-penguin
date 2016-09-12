@@ -1,0 +1,35 @@
+# git clone git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+Cloning into 'linux'...
+# cd linux
+# git remote -v
+origin	git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git (fetch)
+origin	git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git (push)
+# cp /boot/config-$(uname -r) .config
+# make menuconfig
+# cat .config | grep LOCALVERSION_AUTO
+CONFIG_LOCALVERSION_AUTO=y
+# make -j 12
+# make -j 12 modules_install
+# make -j 12 install
+sh ./arch/x86/boot/install.sh 4.8.0-rc5-00196-g98ac9a6 arch/x86/boot/bzImage \
+	System.map "/boot"
+grubby fatal error: unable to find a suitable template
+# grub2-mkconfig -o /boot/grub2/grub.cfg
+Generating grub configuration file ...
+Found linux image: /boot/vmlinuz-4.8.0-rc5-00196-g98ac9a6
+Found initrd image: /boot/initramfs-4.8.0-rc5-00196-g98ac9a6.img
+Found linux image: /boot/vmlinuz-3.10.0-481.el7.x86_64
+Found initrd image: /boot/initramfs-3.10.0-481.el7.x86_64.img
+Found linux image: /boot/vmlinuz-RedHat7.3x86_64-3.10.0-481.el7.x86_64
+Found initrd image: /boot/initramfs-RedHat7.3x86_64-3.10.0-481.el7.x86_64.img
+Found linux image: /boot/vmlinuz-0-rescue-1398b8246f7c4a91a43f1e7a61359066
+Found initrd image: /boot/initramfs-0-rescue-1398b8246f7c4a91a43f1e7a61359066.img
+Found linux image: /boot/vmlinuz-RedHat7.3x86_64-0-rescue-1398b8246f7c4a91a43f1e7a61359066
+Found initrd image: /boot/initramfs-RedHat7.3x86_64-0-rescue-1398b8246f7c4a91a43f1e7a61359066.img
+done
+# grub2-set-default 0
+# reboot
+# uname -r
+4.8.0-rc5-00196-g98ac9a6
+# dmesg |grep DMI
+[    0.000000] DMI: Supermicro SYS-2028TP-DECTR/X10DRT-PT, BIOS 2.0 12/18/2015
