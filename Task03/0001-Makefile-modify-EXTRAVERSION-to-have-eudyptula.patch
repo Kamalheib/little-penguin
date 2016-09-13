@@ -1,0 +1,28 @@
+From f7b56565ee27904a5d2b55226a69674dfc604ed2 Mon Sep 17 00:00:00 2001
+From: Kamal Heib <kamalheib1@gmail.com>
+Date: Mon, 12 Sep 2016 12:12:09 +0300
+Subject: [PATCH] Makefile: modify EXTRAVERSION to have eudyptula
+
+Modify the EXTRAVERSION field to have eudyptula string.
+
+Signed-off-by: Kamal Heib <kamalheib1@gmail.com>
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index a4e6cc5..31f6903 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,7 +1,7 @@
+ VERSION = 4
+ PATCHLEVEL = 8
+ SUBLEVEL = 0
+-EXTRAVERSION = -rc5
++EXTRAVERSION = -rc5-eudyptula
+ NAME = Psychotic Stoned Sheep
+
+ # *DOCUMENTATION*
+--
+1.8.3.1
+
