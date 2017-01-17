@@ -1,0 +1,21 @@
+$ git remote -v | grep linux-next
+linux-next git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+(fetch)
+linux-next git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+(push)
+$ make olddefconfig
+$ make -j 12
+$ make -j 16 modules_install
+$ make -j 16 install
+$ grub2-mkconfig -o /boot/grub2/grub.cfg
+Generating grub configuration file ...
+Found linux image: /boot/vmlinuz-4.10.0-rc4-next-20170118
+Found initrd image: /boot/initramfs-4.10.0-rc4-next-20170118.img
+Found linux image: /boot/vmlinuz-Fedora(Twentyx86_64-4.8.10-200.fc24.x86_64
+Found initrd image:
+/boot/initramfs-Fedora(Twentyx86_64-4.8.10-200.fc24.x86_64.img
+done
+$ grub2-set-default 0
+$ reboot
+$ uname -r
+4.10.0-rc4-next-20170118
