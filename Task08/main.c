@@ -32,6 +32,7 @@
 
 #include <linux/module.h>
 #include <linux/debugfs.h>
+#include <linux/jiffies.h>
 
 MODULE_AUTHOR("Kamal Heib <kamalheib1@gmail.com>");
 MODULE_DESCRIPTION("little penguin Task8");
@@ -50,6 +51,7 @@ static int t8_id = 0xff;
 struct t8_debugfs {
 	struct dentry *root;
 	struct dentry *id;
+	struct dentry *jiffies;
 };
 
 static struct t8_debugfs dbg;
@@ -101,6 +103,7 @@ static const struct file_operations id_fops = {
 	.read = t8_read_id,
 };
 
+
 static int t8_create_id_file(void)
 {
 	t8_info("Create id debugfs file\n");
@@ -113,6 +116,40 @@ static void t8_destroy_id_file(void)
 {
 	t8_info("Destroy id debugfs file\n");
 	debugfs_remove(dbg.id);
+}
+
+static ssize_t t8_read_jiffies(struct file *file,
+			       char __user *ubuf,
+			       size_t count,
+			       loff_t *ppos)
+{
+	char buf[80];
+	ssize_t len;
+	unsigned long long cur_time = get_jiffies_64();
+
+	len = snprintf(buf, sizeof(buf), "%llu\n", cur_time);
+	return simple_read_from_buffer(ubuf, count, ppos, buf, len);
+}
+
+static const struct file_operations jiffies_fops = {
+	.owner = THIS_MODULE,
+	.open = simple_open,
+	.read = t8_read_jiffies,
+};
+
+static int t8_create_jiffies_file(void)
+{
+	t8_info("Create jiffies debugfs file\n");
+	dbg.jiffies = debugfs_create_file("jiffies", S_IRUGO, dbg.root,
+					  NULL, &jiffies_fops);
+	return dbg.jiffies ? 0 : -ENOMEM;
+}
+
+static void t8_destroy_jiffies_file(void)
+{
+
+	t8_info("Destroy jiffies debugfs file\n");
+	debugfs_remove(dbg.jiffies);
 }
 
 static int t8_create_debugfs(void)
@@ -132,7 +169,16 @@ static int t8_create_debugfs(void)
 		goto free_root;
 	}
 
+	err = t8_create_jiffies_file();
+	if (err) {
+		t8_err("Failed to create \"jiffies\" debugfs file\n");
+		goto free_id;
+	}
+
 	return 0;
+
+free_id:
+	t8_destroy_id_file();
 
 free_root:
 	t8_destroy_root_dir();
@@ -142,6 +188,7 @@ free_root:
 
 static void t8_destroy_debugfs(void)
 {
+	t8_destroy_jiffies_file();
 	t8_destroy_id_file();
 	t8_destroy_root_dir();
 }
