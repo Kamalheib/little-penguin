@@ -48,10 +48,14 @@ MODULE_LICENSE("GPL");
 
 static int t8_id = 0xff;
 
+static char t8_foo_buf[PAGE_SIZE];
+
 struct t8_debugfs {
 	struct dentry *root;
 	struct dentry *id;
 	struct dentry *jiffies;
+	struct dentry *foo;
+	spinlock_t lock;
 };
 
 static struct t8_debugfs dbg;
@@ -152,6 +156,60 @@ static void t8_destroy_jiffies_file(void)
 	debugfs_remove(dbg.jiffies);
 }
 
+static ssize_t t8_read_foo(struct file *file,
+			   char __user *ubuf,
+			   size_t count,
+			   loff_t *ppos)
+{
+	ssize_t ret;
+
+	spin_lock_irq(&dbg.lock);
+	ret = simple_read_from_buffer(ubuf, count, ppos, t8_foo_buf, PAGE_SIZE);
+	spin_unlock_irq(&dbg.lock);
+	return ret;
+}
+
+static ssize_t t8_write_foo(struct file *file,
+			   const char __user *ubuf,
+			   size_t count,
+			   loff_t *ppos)
+{
+	int err;
+
+	if (count > PAGE_SIZE)
+		return -ENOSPC;
+
+	spin_lock_irq(&dbg.lock);
+	err = simple_write_to_buffer(t8_foo_buf, sizeof(t8_foo_buf) - 1,
+				     ppos, ubuf, count - 1);
+	spin_unlock_irq(&dbg.lock);
+	if (err < 0)
+		return err;
+
+	return count;
+}
+
+static const struct file_operations foo_fops = {
+	.owner = THIS_MODULE,
+	.open = simple_open,
+	.write = t8_write_foo,
+	.read = t8_read_foo,
+};
+
+static int t8_create_foo_file(void)
+{
+	t8_info("Create foo debugfs file\n");
+	dbg.foo = debugfs_create_file("foo", S_IRUGO | S_IWUSR, dbg.root,
+				      NULL, &foo_fops);
+	return dbg.foo ? 0 : -ENOMEM;
+}
+
+static void t8_destroy_foo_file(void)
+{
+	t8_info("Destroy foo debugfs file\n");
+	debugfs_remove(dbg.foo);
+}
+
 static int t8_create_debugfs(void)
 {
 	int err;
@@ -175,7 +233,16 @@ static int t8_create_debugfs(void)
 		goto free_id;
 	}
 
+	err = t8_create_foo_file();
+	if (err) {
+		t8_err("Failed to create \"foo\" debugfs file\n");
+		goto free_jiffies;
+	}
+
 	return 0;
+
+free_jiffies:
+	t8_destroy_jiffies_file();
 
 free_id:
 	t8_destroy_id_file();
@@ -188,6 +255,7 @@ free_root:
 
 static void t8_destroy_debugfs(void)
 {
+	t8_destroy_foo_file();
 	t8_destroy_jiffies_file();
 	t8_destroy_id_file();
 	t8_destroy_root_dir();
