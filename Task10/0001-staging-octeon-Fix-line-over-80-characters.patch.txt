@@ -1,0 +1,32 @@
+From 4e22d48e038bea3d0e951d7e5990f5c20878e744 Mon Sep 17 00:00:00 2001
+From: Kamal Heib <kamalheib1@gmail.com>
+Date: Fri, 3 Feb 2017 12:52:24 +0200
+Subject: [PATCH] staging: octeon: Fix line over 80 characters
+
+This patch fix the line over 80 characters warning that was detected
+using checkpatch.pl script.
+
+Fixes: 6fe5efa1415c ('staging: octeon: Convert create_singlethread_workqueue()')
+Cc: Bhaktipriya Shridhar <bhaktipriya96@gmail.com>
+Signed-off-by: Kamal Heib <kamalheib1@gmail.com>
+---
+ drivers/staging/octeon/ethernet.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/staging/octeon/ethernet.c b/drivers/staging/octeon/ethernet.c
+index 4971aa54756a..a379734a54b1 100644
+--- a/drivers/staging/octeon/ethernet.c
++++ b/drivers/staging/octeon/ethernet.c
+@@ -889,7 +889,8 @@ static int cvm_oct_probe(struct platform_device *pdev)
+ 				fau -=
+ 				    cvmx_pko_get_num_queues(priv->port) *
+ 				    sizeof(u32);
+-				schedule_delayed_work(&priv->port_periodic_work, HZ);
++				schedule_delayed_work(&priv->port_periodic_work,
++						      HZ);
+ 			}
+ 		}
+ 	}
+-- 
+2.9.3
+
