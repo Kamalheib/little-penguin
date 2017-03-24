@@ -47,12 +47,13 @@ struct identity {
 };
 
 static LIST_HEAD(identities);
+static struct kmem_cache *t12_cache;
 
 static int identity_create(char *name, int id)
 {
 	struct identity *new;
 
-	new = kzalloc(sizeof(*new), GFP_KERNEL);
+	new = kmem_cache_alloc(t12_cache, GFP_KERNEL);
 	if (!new)
 		return -ENOMEM;
 
@@ -82,7 +83,7 @@ void identity_destroy(int id)
 	list_for_each_entry_safe_reverse(i, tmp, &identities, list) {
 		if (i->id == id) {
 			list_del(&i->list);
-			kfree(i);
+			kmem_cache_free(t12_cache, i);
 			return;
 		}
 	}
@@ -96,7 +97,7 @@ void identity_destroy_all(void)
 
 	list_for_each_entry_safe(i, tmp, &identities, list) {
 		list_del(&i->list);
-		kfree(i);
+		kmem_cache_free(t12_cache, i);
 	}
 }
 
@@ -104,6 +105,14 @@ static int __init t12_init(void)
 {
 	struct identity *temp;
 	int err;
+
+	pr_info("Hello World\n");
+	t12_cache = kmem_cache_create("eudyptula",
+				      sizeof(struct identity),
+				      0, SLAB_POISON,
+				      NULL);
+	if (!t12_cache)
+		return -ENOMEM;
 
 	err = identity_create("Alice", 1);
 	if (err)
@@ -143,7 +152,9 @@ destroy:
 
 static void __exit t12_exit(void)
 {
+	pr_info("Good bye\n");
 	identity_destroy_all();
+	kmem_cache_destroy(t12_cache);
 }
 
 module_init(t12_init);
