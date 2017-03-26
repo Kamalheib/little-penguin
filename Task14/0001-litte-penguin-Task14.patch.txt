@@ -1,0 +1,66 @@
+From 3158ef2a350c5bc31c010c021ea712efac9c1955 Mon Sep 17 00:00:00 2001
+From: Kamal Heib <kamalheib1@gmail.com>
+Date: Sun, 16 Apr 2017 20:37:37 +0300
+Subject: [PATCH] litte-penguin: Task14
+
+Signed-off-by: Kamal Heib <kamalheib1@gmail.com>
+---
+ fs/proc/base.c        | 9 +++++++++
+ include/linux/sched.h | 1 +
+ kernel/fork.c         | 1 +
+ 3 files changed, 11 insertions(+)
+
+diff --git a/fs/proc/base.c b/fs/proc/base.c
+index c87b6b9a8a76..bdc7d53601c0 100644
+--- a/fs/proc/base.c
++++ b/fs/proc/base.c
+@@ -2834,6 +2834,14 @@ static int proc_pid_personality(struct seq_file *m, struct pid_namespace *ns,
+ 	return err;
+ }
+ 
++int proc_read_id(struct seq_file *m, struct pid_namespace *ns,
++		      struct pid *pid, struct task_struct *task)
++{
++
++	seq_printf(m, "0x%llx\n", task->id++);
++	return 0;
++}
++
+ /*
+  * Thread groups
+  */
+@@ -2933,6 +2941,7 @@ static const struct pid_entry tgid_base_stuff[] = {
+ 	REG("timers",	  S_IRUGO, proc_timers_operations),
+ #endif
+ 	REG("timerslack_ns", S_IRUGO|S_IWUGO, proc_pid_set_timerslack_ns_operations),
++	ONE("id", S_IRUGO, proc_read_id),
+ };
+ 
+ static int proc_tgid_base_readdir(struct file *file, struct dir_context *ctx)
+diff --git a/include/linux/sched.h b/include/linux/sched.h
+index d67eee84fd43..e05c00076f81 100644
+--- a/include/linux/sched.h
++++ b/include/linux/sched.h
+@@ -511,6 +511,7 @@ struct task_struct {
+ #endif
+ 	int				on_rq;
+ 
++	u64				id;
+ 	int				prio;
+ 	int				static_prio;
+ 	int				normal_prio;
+diff --git a/kernel/fork.c b/kernel/fork.c
+index 6c463c80e93d..9a7fcfdd7ee0 100644
+--- a/kernel/fork.c
++++ b/kernel/fork.c
+@@ -1593,6 +1593,7 @@ static __latent_entropy struct task_struct *copy_process(
+ 
+ 	init_sigpending(&p->pending);
+ 
++	p->id = 0x682c83e55b77;
+ 	p->utime = p->stime = p->gtime = 0;
+ #ifdef CONFIG_ARCH_HAS_SCALED_CPUTIME
+ 	p->utimescaled = p->stimescaled = 0;
+-- 
+2.9.3
+
