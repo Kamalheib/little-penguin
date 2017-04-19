@@ -1,0 +1,5 @@
+Proof:
+[root@localhost ~]# ./a.out
+[  453.694733] Correct ID: id=682c83e55b77 val=682c83e55b77 high=682c low=83e55b77
+[  453.697509] Wrong ID: id=682c83e55b77 val=682c83e55b78 high=682c low=83e55b78
+syscall error=-1

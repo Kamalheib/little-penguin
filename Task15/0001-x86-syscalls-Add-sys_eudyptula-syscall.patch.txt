@@ -1,0 +1,71 @@
+From 41be1a97057b38d2d0632711b48cd95ec0578abb Mon Sep 17 00:00:00 2001
+From: Kamal Heib <kamalheib1@gmail.com>
+Date: Wed, 31 May 2017 21:53:13 +0300
+Subject: [PATCH] x86/syscalls: Add sys_eudyptula syscall
+
+Add sys_eudyptula system call.
+
+Signed-off-by: Kamal Heib <kamalheib1@gmail.com>
+---
+ arch/x86/entry/syscalls/syscall_64.tbl |  1 +
+ include/linux/syscalls.h               |  1 +
+ kernel/sys.c                           | 20 ++++++++++++++++++++
+ 3 files changed, 22 insertions(+)
+
+diff --git a/arch/x86/entry/syscalls/syscall_64.tbl b/arch/x86/entry/syscalls/syscall_64.tbl
+index 5aef183e2f85..0d988b2f78ec 100644
+--- a/arch/x86/entry/syscalls/syscall_64.tbl
++++ b/arch/x86/entry/syscalls/syscall_64.tbl
+@@ -339,6 +339,7 @@
+ 330	common	pkey_alloc		sys_pkey_alloc
+ 331	common	pkey_free		sys_pkey_free
+ 332	common	statx			sys_statx
++333	common	eudyptula		sys_eudyptula
+ 
+ #
+ # x32-specific system call numbers start at 512 to avoid cache impact
+diff --git a/include/linux/syscalls.h b/include/linux/syscalls.h
+index 980c3c9b06f8..7614783f7167 100644
+--- a/include/linux/syscalls.h
++++ b/include/linux/syscalls.h
+@@ -905,5 +905,6 @@ asmlinkage long sys_pkey_alloc(unsigned long flags, unsigned long init_val);
+ asmlinkage long sys_pkey_free(int pkey);
+ asmlinkage long sys_statx(int dfd, const char __user *path, unsigned flags,
+ 			  unsigned mask, struct statx __user *buffer);
++asmlinkage long	sys_eudyptula(int high_id, int low_id);
+ 
+ #endif
+diff --git a/kernel/sys.c b/kernel/sys.c
+index 8a94b4eabcaa..600b34db1b00 100644
+--- a/kernel/sys.c
++++ b/kernel/sys.c
+@@ -2393,6 +2393,26 @@ SYSCALL_DEFINE1(sysinfo, struct sysinfo __user *, info)
+ 	return 0;
+ }
+ 
++SYSCALL_DEFINE2(eudyptula, int, high_id, int, low_id)
++{
++	u64 id = 0x682c83e55b77;
++	u32 high = (u32)high_id;
++	u32 low = (u32)low_id;
++	u64 val;
++
++	val = ((u64)high) << 32 | ((u64)low);
++	if (val != id) {
++		pr_err("Wrong ID: id=%llx val=%llx high=%x low=%x\n",
++		       id, val, high, low);
++		return -EINVAL;
++	}
++
++	pr_info("Correct ID: id=%llx val=%llx high=%x low=%x\n",
++		id, val, high, low);
++
++	return 0;
++}
++
+ #ifdef CONFIG_COMPAT
+ struct compat_sysinfo {
+ 	s32 uptime;
+-- 
+2.9.4
+
