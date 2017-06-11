@@ -1,0 +1,31 @@
+From 019e7a86453a1d5be16fd92a3999392d3b0f2cbf Mon Sep 17 00:00:00 2001
+From: Kamal Heib <kamalheib1@gmail.com>
+Date: Fri, 30 Jun 2017 21:34:43 +0300
+Subject: staging: android: ion: statify __ion_add_cma_heaps
+
+Fix the following sparse warning:
+symbol '__ion_add_cma_heaps' was not declared. Should it be static?
+
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Kamal Heib <kamalheib1@gmail.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+---
+ drivers/staging/android/ion/ion_cma_heap.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/staging/android/ion/ion_cma_heap.c b/drivers/staging/android/ion/ion_cma_heap.c
+index a0949bc..c6db9b7 100644
+--- a/drivers/staging/android/ion/ion_cma_heap.c
++++ b/drivers/staging/android/ion/ion_cma_heap.c
+@@ -106,7 +106,7 @@ static struct ion_heap *__ion_cma_heap_create(struct cma *cma)
+ 	return &cma_heap->heap;
+ }
+ 
+-int __ion_add_cma_heaps(struct cma *cma, void *data)
++static int __ion_add_cma_heaps(struct cma *cma, void *data)
+ {
+ 	struct ion_heap *heap;
+ 
+-- 
+cgit v1.1
+
